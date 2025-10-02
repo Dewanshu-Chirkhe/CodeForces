@@ -1,2 +1,2 @@
-5 2
-BGGBG
+5
+RRRRR
