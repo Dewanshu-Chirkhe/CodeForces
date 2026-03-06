@@ -1,6 +1,5 @@
-import java.io.*;
-import java.util.*;
 
+import java.util.*;
 public class onlyOneDigit {
     public static void main(String[] args) throws Exception {
         Scanner sc = new Scanner(System.in);
