@@ -4,7 +4,15 @@ import java.util.*;
 public class goalsOfVictory {
     public static void main(String[] args) throws Exception {
         Scanner sc = new Scanner(System.in);
-        
+        int t = sc.nextInt();
+        while(t-- > 0){
+            int n = sc.nextInt();
+            int sum = 0;
+            for(int i=0 ; i<n-1 ; i++){
+                sum += sc.nextInt();
+            }
+            System.out.println(-sum);
+        }
         sc.close();
     }
 }
