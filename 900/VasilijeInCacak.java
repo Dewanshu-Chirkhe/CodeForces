@@ -10,13 +10,8 @@ public class VasilijeInCacak {
             long k = sc.nextLong();
             long x = sc.nextLong();
 
-            long minSum = (k * (k + 1)) / 2;
-            long maxSum = 0;
-            while(k != 0){
-                maxSum += n;
-                n--;
-                k--;
-            }
+            long minSum = (k*(k+1))/2;
+            long maxSum = (n*(n+1))/2 - ((n-k) * (n-k+1))/2;
 
             if(x >= minSum && x <= maxSum) System.out.println("YES");
             else System.out.println("NO");
