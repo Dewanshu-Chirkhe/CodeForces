@@ -63,6 +63,7 @@ def push_batch(problem_ids, file_paths):
     for path in file_paths:
         os.system(f'git add "{path}"')
 
+    os.system('git add seen_submissions.txt solved_problems.txt')   
     msg = "Codeforces: " + ", ".join(problem_ids)
 
     os.system(f'git commit -m "{msg}"')
