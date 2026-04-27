@@ -46,7 +46,6 @@ def create_file(problem_id):
         return
 
     with open(path, "w") as f:
-        f.write("import java.io.*;\n")
         f.write("import java.util.*;\n\n")
         f.write(f"public class {class_name} {{\n")
         f.write("    public static void main(String[] args) {\n")

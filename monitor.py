@@ -1,6 +1,7 @@
 import requests
 import time
 import os
+import sys
 
 HANDLE = "Dewanshu-Chirkhe"
 BASE_DIR = "."
@@ -26,7 +27,7 @@ def save_set(file, data):
 
 
 # -------------------------------
-# Fetch Recent Submissions
+# Fetch Submissions
 # -------------------------------
 
 def get_recent_submissions():
@@ -35,7 +36,7 @@ def get_recent_submissions():
 
 
 # -------------------------------
-# Find Corresponding File
+# Find File
 # -------------------------------
 
 def find_file(problem_id):
@@ -53,17 +54,15 @@ def find_file(problem_id):
 
 
 # -------------------------------
-# Batch Git Push
+# Batch Push
 # -------------------------------
 
 def push_batch(problem_ids, file_paths):
     print("Batch pushing to GitHub...")
 
-    # Add all files
     for path in file_paths:
         os.system(f'git add "{path}"')
 
-    # Create commit message
     msg = "Codeforces: " + ", ".join(problem_ids)
 
     os.system(f'git commit -m "{msg}"')
@@ -71,60 +70,65 @@ def push_batch(problem_ids, file_paths):
 
 
 # -------------------------------
-# Monitor Loop
+# Core Logic (shared)
 # -------------------------------
 
-def monitor():
+def process_submissions():
     seen = load_set(SEEN_FILE)
     solved = load_set(SOLVED_FILE)
 
-    print("Monitoring submissions...")
+    subs = get_recent_submissions()
 
+    new_problem_ids = []
+    new_files = []
+
+    for sub in reversed(subs):
+        sub_id = str(sub["id"])
+
+        if sub_id in seen:
+            continue
+
+        seen.add(sub_id)
+
+        if sub["verdict"] == "OK":
+            contestId = sub["problem"]["contestId"]
+            index = sub["problem"]["index"]
+            problem_id = f"{contestId}{index}"
+
+            if problem_id in solved:
+                continue
+
+            file_path = find_file(problem_id)
+
+            if file_path:
+                print(f"Accepted: {problem_id}")
+                new_problem_ids.append(problem_id)
+                new_files.append(file_path)
+                solved.add(problem_id)
+            else:
+                print(f"File not found for {problem_id}")
+
+    save_set(SEEN_FILE, seen)
+    save_set(SOLVED_FILE, solved)
+
+    if new_files:
+        push_batch(new_problem_ids, new_files)
+    else:
+        print("No new accepted submissions.")
+
+
+# -------------------------------
+# Modes
+# -------------------------------
+
+def run_once():
+    print("Running once...")
+    process_submissions()
+
+def watch():
+    print("Watching submissions...")
     while True:
-        try:
-            subs = get_recent_submissions()
-
-            new_problem_ids = []
-            new_files = []
-
-            # Process oldest first (clean order)
-            for sub in reversed(subs):
-                sub_id = str(sub["id"])
-
-                if sub_id in seen:
-                    continue
-
-                seen.add(sub_id)
-
-                if sub["verdict"] == "OK":
-                    contestId = sub["problem"]["contestId"]
-                    index = sub["problem"]["index"]
-                    problem_id = f"{contestId}{index}"
-
-                    if problem_id in solved:
-                        continue
-
-                    file_path = find_file(problem_id)
-
-                    if file_path:
-                        print(f"Accepted: {problem_id}")
-                        new_problem_ids.append(problem_id)
-                        new_files.append(file_path)
-                        solved.add(problem_id)
-                    else:
-                        print(f"File not found for {problem_id}")
-
-            # Save tracking
-            save_set(SEEN_FILE, seen)
-            save_set(SOLVED_FILE, solved)
-
-            # Push all at once
-            if new_files:
-                push_batch(new_problem_ids, new_files)
-
-        except Exception as e:
-            print("Error:", e)
-
+        process_submissions()
         time.sleep(10)
 
 
@@ -133,4 +137,7 @@ def monitor():
 # -------------------------------
 
 if __name__ == "__main__":
-    monitor()
+    if len(sys.argv) > 1 and sys.argv[1] == "run-once":
+        run_once()
+    else:
+        watch()
