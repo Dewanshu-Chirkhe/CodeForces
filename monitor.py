@@ -69,26 +69,30 @@ def find_file(problem_id):
 def push_batch(problem_ids, file_paths):
     print("Batch pushing to GitHub...")
 
-    for path in file_paths:
-        if os.system(f'git add "{path}"') != 0:
-            print(f"Failed to add {path}")
-            return False
-
-    # Add state files too
-    if os.system('git add seen_submissions.txt solved_problems.txt') != 0:
-        print("Failed to add state files")
+    # Stage everything (safe)
+    if os.system('git add .') != 0:
+        print("Failed to add files")
         return False
 
-    msg = "Codeforces: " + ", ".join(problem_ids)
+    # Check if anything is actually staged
+    if os.system("git diff --cached --quiet") == 0:
+        print("No changes to commit. Skipping push.")
+        return False
 
+    # Commit message
+    msg = "Codeforces: " + ", ".join(problem_ids) if problem_ids else "Auto update"
+
+    # Commit
     if os.system(f'git commit -m "{msg}"') != 0:
-        print("Commit failed (maybe nothing to commit)")
+        print("Commit failed")
         return False
 
+    # Push
     if os.system("git push") != 0:
         print("Push failed")
         return False
 
+    print("Push successful")
     return True
 
 
