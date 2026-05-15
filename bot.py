@@ -50,10 +50,12 @@ def create_file(problem_id):
         f.write(f"public class {class_name} {{\n")
         f.write("    public static void main(String[] args) {\n")
         f.write("        Scanner sc = new Scanner(System.in);\n")
+        f.write("\n");
         f.write("        int t = sc.nextInt();\n")
         f.write("        while(t-- > 0){\n")
         f.write("            int n = sc.nextInt();\n\n")
         f.write("        }\n")
+        f.write("\n");
         f.write("        sc.close();\n")
         f.write("    }\n")
         f.write("}\n")
